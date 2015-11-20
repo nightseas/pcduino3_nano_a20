@@ -9,6 +9,11 @@ Well, it's my first try on both Kernel 4.x and pcDuino3 Nano. The early idea was
  - My host platform: Xeon X5650 + Ubuntu MATE 15.10
  - Target platform: pcDuino3 Nano Lite (should work for Nano too)
 
+A Linux based software system for ARM usually contains these components:
+ - Bootloader: U-Boot and a small boot running before it (xloader, boot0, FSBL... could be close-source)
+ - Kernel: Now 4.x is the mainline version, and 2.x is still widely used. Also large number of modules, mostly drivers, just to reduce the size fo kernel image.
+ - Root File System: Can be built by busybox or builroot tools, or fetched from Ubuntu, Debian, Fedora...
+ - You also need a loacal or corss platform compiler (ARM Linux GCC) to compile all the softwares. 
 
 ## Cross-compiler: Linaro GCC
 
@@ -81,7 +86,50 @@ Fetch stable kernel source from kernel.org:
 ```sh
 git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
 ```
-#(TBD)
+
+Switch to the branch (kernel version) you want.
+
+Kernel 4.3.y:
+```sh
+git checkout linux-4.3.y
+```
+
+Kernel 4.2.y:
+```sh
+git checkout linux-4.2.y
+```
+
+Kernel 4.1.y (it doesn't contain the dts file for Nano):
+```sh
+git checkout linux-4.1.y
+```
+
+Configure Kernel. The default configuration for Allwinner(sunxi) is a baseline but not good enough to use. Additional menuconfig is needed to enable basic drivers, such as USB keyboard/mouse or wireless dongle.
+```sh
+make sunxi_defconfig
+make menuconfig
+```
+
+I've prepared a lite version for Nano, download the latest one:
+```sh
+wget -C https://github.com/nightseas/pcduino3_nano_a20/kernel/pcduino3_nano_config
+mv pcduino3_nano_config .config
+make menuconfig
+```
+
+Compile Kernel (zImage), device tree & modules (add '-j' param to speed up):
+```sh
+make zImage
+make dtbs
+make modules
+```
+
+Create deploy folder and copy the compiled files:
+```sh
+cp arch/arm/boot/zImage deploy/
+cp arch/arm/boot/dts/sun7i-a20-pcduino3-nano.dtb deploy/
+make modules_install INSTALL_MOD_PATH=deploy/
+```
 
 ## Fetch RootFS
 #(TBD)
@@ -93,10 +141,10 @@ sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
 Format the disk with GParted tool. Here's a recommanded partition table:
-| Partition Name 	| Format 	| Start Position 	| Size         	|
-|----------------	|--------	|----------------	|--------------	|
-| BOOT           	| fat    	| 1MB            	| 100MB        	|
-| RootFS         	| ext4   	| 100MB          	| At least 4GB 	|
+|Partition Name|Format|Start Position|Size|
+|---|---|---|---|
+|BOOT|fat|1MB|100MB|
+|RootFS|ext4|100MB|At least 4GB|
 
 Write the bootloader generated from U-Boot compiling step to SD card.
 ```sh
