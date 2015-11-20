@@ -1,4 +1,4 @@
-# Buildup Linux 4.x & Lubuntu System on pcDuino3 Nano
+# Buildup Linux 4.x & Ubuntu System on pcDuino3 Nano
 
 By Xiaohai Li (haixiaoli@163.com)
 
@@ -11,9 +11,9 @@ Well, it's my first try on both Kernel 4.x and pcDuino3 Nano. The early idea was
 
 A Linux based software system for ARM usually contains these components:
  - Bootloader: U-Boot and a small boot running before it (xloader, boot0, FSBL... could be close-source)
- - Kernel: Now 4.x is the mainline version, and 2.x is still widely used. Also large number of modules, mostly drivers, just to reduce the size fo kernel image.
- - Root File System: Can be built by busybox or builroot tools, or fetched from Ubuntu, Debian, Fedora...
- - You also need a loacal or corss platform compiler (ARM Linux GCC) to compile all the softwares. 
+ - Kernel: Now 4.x is the mainline version, and 2.x is still widely used. Also large number of modules, mostly drivers, just to reduce the size of kernel image.
+ - Root File System: Can be built by busybox or buildroot tools, or fetched from Ubuntu, Debian, Fedora...
+ - You also need a local or cross platform compiler (ARM Linux GCC) to compile all the softwares. 
 
 ## Cross-compiler: Linaro GCC
 
@@ -112,7 +112,7 @@ make menuconfig
 
 I've prepared a lite version for Nano, download the latest one:
 ```sh
-wget -C https://github.com/nightseas/pcduino3_nano_a20/kernel/pcduino3_nano_config
+wget -c https://github.com/nightseas/pcduino3_nano_a20/raw/master/kernel/pcduino3_nano_config
 mv pcduino3_nano_config .config
 make menuconfig
 ```
@@ -131,8 +131,43 @@ cp arch/arm/boot/dts/sun7i-a20-pcduino3-nano.dtb deploy/
 make modules_install INSTALL_MOD_PATH=deploy/
 ```
 
-## Fetch RootFS
-#(TBD)
+## Create RootFS
+Download pre-built Ubuntu 14.10 image from Linaro:
+```sh
+wget -c http://releases.linaro.org/15.04/ubuntu/utopic-images/nano/linaro-utopic-nano-20150421-702.tar.gz
+sudo tar xzf linaro-utopic-nano-20150421-702.tar.gz
+```
+
+Copy modules and firmware built with kernel to lib folder:
+```sh
+cd binary/
+sudo cp -R <path to kernel>/deploy/lib/* lib/
+```
+
+Edit fstab to mount SD card when Nano boots up. 
+```sh
+sudo nano /media/rootfs/etc/fstab
+```
+
+Add these two lines:
+```sh
+/dev/mmcblk0p2  /      auto  errors=remount-ro  0  1
+/dev/mmcblk0p1  /boot  auto  errors=remount-ro  0  1
+```
+
+Edit network configuration to enable Ethernet and DHCP:
+```sh
+sudo nano /media/rootfs/etc/network/interfaces
+```
+
+Add these lines:
+```sh
+auto lo
+iface lo inet loopback
+  
+auto eth0
+iface eth0 inet dhcp
+```
 
 ## Make A Bootable SD Card
 Erase the partition table and boot information on the SD card (change sdX to your SD drive, like sda. If there is a MMC reader on your host, the drive name may also be mmcblkX):
@@ -140,15 +175,15 @@ Erase the partition table and boot information on the SD card (change sdX to you
 sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
-Format the disk with GParted tool. Here's a recommanded partition table:
+Format the disk with GParted tool. Here's a recommended partition table:
 |Partition Name|Format|Start Position|Size|
 |---|---|---|---|
 |BOOT|fat|1MB|100MB|
 |RootFS|ext4|100MB|At least 4GB|
 
-Write the bootloader generated from U-Boot compiling step to SD card.
+Write the bootloader to SD card.
 ```sh
-sudo dd if=./u-boot/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
+sudo dd if=<path to u-boot>/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
 ```
 
 Mount partitions:
@@ -159,11 +194,60 @@ sudo mount /dev/sdX1 /media/boot/
 sudo mount /dev/sdX2 /media/rootfs/
 ```
 
-Write the bootloader generated from U-Boot compiling step to SD card.
+Copy Kernel image and device tree to boot partition of SD card.
 ```sh
-sudo dd if=./u-boot/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
+sudo cp -R <path to kernel>/deploy/zImage /media/boot/
+sudo cp -R <path to kernel>/deploy/sun7i-a20-pcduino3-nano.dtb /media/boot/
 ```
 
-#(TBD)
+Create a settings file on boot partition:
+```sh
+sudo mkdir -p /media/boot/extlinux/
+sudo nano /media/boot/extlinux/extlinux.conf
+```
+
+Add label in extlinux.conf to set the Kernel boot parameters:
+```sh
+label Linux 4.1.13
+kernel ../zImage
+append root=/dev/mmcblk0p2
+fdtdir ../
+```
+
+Copy the root file system to rootfs partition of SD card.
+```sh
+sudo cp -R <path to rootfs>/binary/* /media/rootfs/
+```
+
+The card is ready for use now, umount SD drive.
+```sh
+sudo umount /media/boot/
+sudo umount /media/rootfs/
+```
+
+## Fisrt Boot Up
+
+Insert the SD card to pcDuino3 Nano, and connect 5V/2A USB power, HDMI, Ethernet, USB keyboard/mouse to Nano. Then there will be boot information showed on the screen, first from U-Boot, and then Linux. Linux Kernel will load RootFS of Ubuntu at late boot phase.
+
+Finally the software will auto-login as root user. But the default user is linaro with blank password. Change your password and update packages.
+```sh
+passwd linaro
+#( input your password twice)
+apt-get update 
+apt-get upgrade
+```
+
+So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface. Let's install Lubuntu desktop (about 1.3GB) online with apt tool.
+```sh
+sudo apt-get install lubuntu-desktop
+```
+
+For other desktops:
+```sh
+sudo apt-get install ubuntu-desktop  # Ubuntu Unity
+sudo apt-get install kubuntu-desktop  # Kubuntu
+```
+
+The installation will take hours. Get a cup of coffee and wait. After it's done, reboot pcDuino and ...
 
 ### Have fine!
