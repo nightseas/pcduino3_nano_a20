@@ -194,22 +194,26 @@ iface eth0 inet dhcp
 
 ## Make A Bootable SD Card
 Erase the partition table and boot information on the SD card (change sdX to your SD drive, like sda. If there is a MMC reader on your host, the drive name may also be mmcblkX):
+
 ```sh
 sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
 Format the disk with GParted tool. Here's a recommended partition table:
+
 |    Partition Name|Format    |    Start Position    |    Size    |
 |    ---    |    ---    |    ---    |    ---    |
 |    BOOT    |    fat    |    1MB    |    100MB    |
 |    RootFS    |    ext4    |    100MB    |    At least 4GB    |
 
 Write the bootloader to SD card.
+
 ```sh
 sudo dd if=<path to u-boot>/u-boot-sunxi-with-spl.bin of=/dev/sdX bs=1024 seek=8
 ```
 
 Mount partitions:
+
 ```sh
 sudo mkdir -p /media/boot/
 sudo mkdir -p /media/rootfs/
@@ -218,18 +222,21 @@ sudo mount /dev/sdX2 /media/rootfs/
 ```
 
 Copy Kernel image and device tree to boot partition of SD card.
+
 ```sh
 sudo cp -R <path to kernel>/deploy/zImage /media/boot/
 sudo cp -R <path to kernel>/deploy/sun7i-a20-pcduino3-nano.dtb /media/boot/
 ```
 
 Create a settings file on boot partition:
+
 ```sh
 sudo mkdir -p /media/boot/extlinux/
 sudo nano /media/boot/extlinux/extlinux.conf
 ```
 
 Add label in extlinux.conf to set the Kernel boot parameters:
+
 ```sh
 label Linux 4.1.13
 kernel ../zImage
@@ -238,11 +245,13 @@ fdtdir ../
 ```
 
 Copy the root file system to rootfs partition of SD card.
+
 ```sh
 sudo cp -RP <path to rootfs>/binary/* /media/rootfs/
 ```
 
 The card is ready for use now, umount SD drive.
+
 ```sh
 sudo umount /media/boot/
 sudo umount /media/rootfs/
@@ -253,6 +262,7 @@ sudo umount /media/rootfs/
 Insert the SD card to pcDuino3 Nano, and connect 5V/2A USB power, HDMI, Ethernet, USB keyboard/mouse to Nano. Then there will be boot information showed on the screen, first from U-Boot, and then Linux. Linux Kernel will load RootFS of Ubuntu at late boot phase.
 
 Finally the software will auto-login as root user. But the default user is linaro with blank password. Change your password and update packages.
+
 ```sh
 passwd linaro
 #( input your password twice)
@@ -261,11 +271,13 @@ apt-get upgrade
 ```
 
 So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface if you choose NANO or DEVELOPER image. Let's install Lubuntu desktop (about 1.3GB) online with apt tool.
+
 ```sh
 sudo apt-get install lubuntu-desktop
 ```
 
 For other desktops:
+
 ```sh
 sudo apt-get install ubuntu-desktop  # Ubuntu Unity
 sudo apt-get install kubuntu-desktop  # Kubuntu
