@@ -13,7 +13,7 @@ A Linux based software system for ARM usually contains these components:
  - Bootloader: U-Boot and a small boot running before it (xloader, boot0, FSBL... could be close-source)
  - Kernel: Now 4.x is the mainline version, and 2.x is still widely used. Also large number of modules, mostly drivers, just to reduce the size of kernel image.
  - Root File System: Can be built by busybox or buildroot tools, or fetched from Ubuntu, Debian, Fedora...
- - You also need a local or cross platform compiler (ARM Linux GCC) to compile all the softwares. 
+ - You also need a local or cross platform compiler (ARM Linux GCC) to compile all the software. 
 
 ## Cross-compiler: Linaro GCC
 
@@ -44,7 +44,7 @@ export ARCH=arm
 export CROSS_COMPILE=${PWD}/bin/arm-linux-gnueabihf-
 ```
 
-You can also try other versions of GCC. Download linck:
+You can also try other versions of GCC. Download link:
 http://www.linaro.org/downloads/
 
 ## Build U-Boot
@@ -104,7 +104,7 @@ Kernel 4.1.y (it doesn't contain the dts file for Nano):
 git checkout linux-4.1.y
 ```
 
-Configure Kernel. The default configuration for Allwinner(sunxi) is a baseline but not good enough to use. Additional menuconfig is needed to enable basic drivers, such as USB keyboard/mouse or wireless dongle.
+Configure Kernel. The default configuration for Allwinner (sunxi) is a baseline but not good enough to use. Additional menuconfig is needed to enable basic drivers, such as USB keyboard/mouse or wireless dongle.
 ```sh
 make sunxi_defconfig
 make menuconfig
@@ -131,65 +131,28 @@ cp arch/arm/boot/dts/sun7i-a20-pcduino3-nano.dtb deploy/
 make modules_install INSTALL_MOD_PATH=deploy/
 ```
 
-## Create RootFS
-Download pre-built Ubuntu 14.04 image from Linaro (here I choose the NANO image):
+## Fetch RootFS
+Download pre-built Ubuntu 14.04 image from Linaro (here I choose the DEVELOPER image):
 
-#### NANO
+### NANO
 Description from Linaro: NANO provides a very minimum rootfs that's contains a fully function support for apt (the package management system used by Ubuntu). This image only provides console support, and should be used in case you want a fast and small image to develop and verify the kernel and system functionality. 
 
 ```sh
 wget -c http://releases.linaro.org/14.10/ubuntu/trusty-images/nano/linaro-trusty-nano-20141024-684.tar.gz
-sudo tar xfvp linaro-trusty-nano-20141024-684.tar.gz
 ```
 
-#### DEVELOPER
+### DEVELOPER
 Description from Linaro: Due demands for a minimum-console based image with extra developer tools integrated by default, the developer rootfs was created. This image is based on Nano, but also deploying a working toolchain, debuggers and also additional development and profiling tools needed by kernel and system developers. 
 
-Download Link: 
-
 ```sh
-http://releases.linaro.org/14.10/ubuntu/trusty-images/developer/linaro-trusty-developer-20141024-684.tar.gz
+wget -c http://releases.linaro.org/14.10/ubuntu/trusty-images/developer/linaro-trusty-developer-20141024-684.tar.gz
 ```
 
-#### ALIP
+### ALIP
 Description from Linaro: ALIP is a small distribution used for bringing up ARM boards both by ARM internally and by various customers. Currently ALIP is based on LXDE (Lubuntu), with lightdm, X11 and chromium as the default graphic applications. 
 
-Download Link: 
-
 ```sh
-http://releases.linaro.org/14.10/ubuntu/trusty-images/alip/linaro-trusty-alip-20141024-684.tar.gz
-```
-
-
-Copy modules and firmware built with kernel to lib folder:
-```sh
-cd binary/
-sudo cp -R <path to kernel>/deploy/lib/* lib/
-```
-
-Edit fstab to mount SD card when Nano boots up. 
-```sh
-sudo nano /media/rootfs/etc/fstab
-```
-
-Add these two lines:
-```sh
-/dev/mmcblk0p2  /      auto  errors=remount-ro  0  1
-/dev/mmcblk0p1  /boot  auto  errors=remount-ro  0  1
-```
-
-Edit network configuration to enable Ethernet and DHCP:
-```sh
-sudo nano /media/rootfs/etc/network/interfaces
-```
-
-Add these lines:
-```sh
-auto lo
-iface lo inet loopback
-  
-auto eth0
-iface eth0 inet dhcp
+wget -c http://releases.linaro.org/14.10/ubuntu/trusty-images/alip/linaro-trusty-alip-20141024-684.tar.gz
 ```
 
 ## Make A Bootable SD Card
@@ -199,7 +162,7 @@ Erase the partition table and boot information on the SD card (change sdX to you
 sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
-Format the disk with GParted tool. Here's a recommended partition table:
+Format the disk with GParted or fdisk tool. Here's a recommended partition table:
 
 |    Partition Name|Format    |    Start Position    |    Size    |
 |    ---    |    ---    |    ---    |    ---    |
@@ -244,10 +207,41 @@ append root=/dev/mmcblk0p2
 fdtdir ../
 ```
 
-Copy the root file system to rootfs partition of SD card.
+Decompress the root file system to rootfs partition of SD card.
 
 ```sh
-sudo cp -RP <path to rootfs>/binary/* /media/rootfs/
+sudo tar xpvf <path to rootfs>/linaro-trusty-developer-20141024-684.tar.gz -C /media/rootfs/
+sudo mv /media/rootfs/binary/* /media/rootfs/
+```
+
+Copy modules and firmware built with kernel to lib folder:
+```sh
+sudo cp -R <path to kernel>/deploy/lib/* /media/rootfs/lib/
+```
+
+Edit fstab to mount SD card when Nano boots up. 
+```sh
+sudo nano /media/rootfs/etc/fstab
+```
+
+Add these two lines:
+```sh
+/dev/mmcblk0p2  /      auto  errors=remount-ro  0  1
+/dev/mmcblk0p1  /boot  auto  errors=remount-ro  0  1
+```
+
+Edit network configuration to enable Ethernet and DHCP:
+```sh
+sudo nano /media/rootfs/etc/network/interfaces
+```
+
+Add these lines:
+```sh
+auto lo
+iface lo inet loopback
+  
+auto eth0
+iface eth0 inet dhcp
 ```
 
 The card is ready for use now, umount SD drive.
@@ -257,11 +251,11 @@ sudo umount /media/boot/
 sudo umount /media/rootfs/
 ```
 
-## Fisrt Boot Up
+## First Boot Up
 
 Insert the SD card to pcDuino3 Nano, and connect 5V/2A USB power, HDMI, Ethernet, USB keyboard/mouse to Nano. Then there will be boot information showed on the screen, first from U-Boot, and then Linux. Linux Kernel will load RootFS of Ubuntu at late boot phase.
 
-Finally the software will auto-login as root user. But the default user is linaro with blank password. Change your password and update packages.
+Finally the software will auto-login as root user. But the default user is Linaro with blank password. Change your password and update packages.
 
 ```sh
 passwd linaro
@@ -270,7 +264,7 @@ apt-get update
 apt-get upgrade
 ```
 
-So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface if you choose NANO or DEVELOPER image. Let's install Lubuntu desktop (about 1.3GB) online with apt tool.
+So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface if you choose NANO or DEVELOPER image. Let's install Lubuntu desktop (about 1.3GB) or some other GUI desktops online with apt tool.
 
 ```sh
 sudo apt-get install lubuntu-desktop
@@ -283,6 +277,6 @@ sudo apt-get install ubuntu-desktop  # Ubuntu Unity
 sudo apt-get install kubuntu-desktop  # Kubuntu
 ```
 
-The installation will take hours. Get a cup of coffee and wait. After it's done, reboot pcDuino and ...
+The installation will take hours. Get a cup of coffee and wait. After it's done, reboot pcDuino and...
 
 ### Have fine!
