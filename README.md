@@ -199,10 +199,10 @@ sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
 Format the disk with GParted tool. Here's a recommended partition table:
-| Partition Name|Format | Start Position | Size |
-| --- | --- | --- | --- |
-| BOOT | fat | 1MB | 100MB |
-| RootFS | ext4 | 100MB | At least 4GB |
+|    Partition Name|Format    |    Start Position    |    Size    |
+|    ---    |    ---    |    ---    |    ---    |
+|    BOOT    |    fat    |    1MB    |    100MB    |
+|    RootFS    |    ext4    |    100MB    |    At least 4GB    |
 
 Write the bootloader to SD card.
 ```sh
