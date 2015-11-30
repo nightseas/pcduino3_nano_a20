@@ -44,7 +44,7 @@ export ARCH=arm
 export CROSS_COMPILE=${PWD}/bin/arm-linux-gnueabihf-
 ```
 
-You can also try other versions of GCC. Download link:
+You can also try other versions of GCC. Download linck:
 http://www.linaro.org/downloads/
 
 ## Build U-Boot
@@ -132,11 +132,34 @@ make modules_install INSTALL_MOD_PATH=deploy/
 ```
 
 ## Create RootFS
-Download pre-built Ubuntu 14.10 image from Linaro:
+Download pre-built Ubuntu 14.04 image from Linaro (here I choose the NANO image):
+
+#### NANO
+Description from Linaro: NANO provides a very minimum rootfs that's contains a fully function support for apt (the package management system used by Ubuntu). This image only provides console support, and should be used in case you want a fast and small image to develop and verify the kernel and system functionality. 
+
 ```sh
-wget -c http://releases.linaro.org/15.04/ubuntu/utopic-images/nano/linaro-utopic-nano-20150421-702.tar.gz
-sudo tar xzf linaro-utopic-nano-20150421-702.tar.gz
+wget -c http://releases.linaro.org/14.10/ubuntu/trusty-images/nano/linaro-trusty-nano-20141024-684.tar.gz
+sudo tar xfvp linaro-trusty-nano-20141024-684.tar.gz
 ```
+
+#### DEVELOPER
+Description from Linaro: Due demands for a minimum-console based image with extra developer tools integrated by default, the developer rootfs was created. This image is based on Nano, but also deploying a working toolchain, debuggers and also additional development and profiling tools needed by kernel and system developers. 
+
+Download Link: 
+
+```sh
+http://releases.linaro.org/14.10/ubuntu/trusty-images/developer/linaro-trusty-developer-20141024-684.tar.gz
+```
+
+#### ALIP
+Description from Linaro: ALIP is a small distribution used for bringing up ARM boards both by ARM internally and by various customers. Currently ALIP is based on LXDE (Lubuntu), with lightdm, X11 and chromium as the default graphic applications. 
+
+Download Link: 
+
+```sh
+http://releases.linaro.org/14.10/ubuntu/trusty-images/alip/linaro-trusty-alip-20141024-684.tar.gz
+```
+
 
 Copy modules and firmware built with kernel to lib folder:
 ```sh
@@ -176,10 +199,10 @@ sudo dd if=/dev/zero of=/dev/sdX bs=1M count=10
 ```
 
 Format the disk with GParted tool. Here's a recommended partition table:
-|Partition Name|Format|Start Position|Size|
-|---|---|---|---|
-|BOOT|fat|1MB|100MB|
-|RootFS|ext4|100MB|At least 4GB|
+| Partition Name|Format | Start Position | Size |
+| --- | --- | --- | --- |
+| BOOT | fat | 1MB | 100MB |
+| RootFS | ext4 | 100MB | At least 4GB |
 
 Write the bootloader to SD card.
 ```sh
@@ -216,7 +239,7 @@ fdtdir ../
 
 Copy the root file system to rootfs partition of SD card.
 ```sh
-sudo cp -R <path to rootfs>/binary/* /media/rootfs/
+sudo cp -RP <path to rootfs>/binary/* /media/rootfs/
 ```
 
 The card is ready for use now, umount SD drive.
@@ -237,7 +260,7 @@ apt-get update
 apt-get upgrade
 ```
 
-So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface. Let's install Lubuntu desktop (about 1.3GB) online with apt tool.
+So far the Linux 4.x + Ubuntu system is running well, but with an ugly terminal interface if you choose NANO or DEVELOPER image. Let's install Lubuntu desktop (about 1.3GB) online with apt tool.
 ```sh
 sudo apt-get install lubuntu-desktop
 ```
