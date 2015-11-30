@@ -280,3 +280,6 @@ sudo apt-get install kubuntu-desktop  # Kubuntu
 The installation will take hours. Get a cup of coffee and wait. After it's done, reboot pcDuino and...
 
 ### Have fine!
+
+A screenshot of Lubuntu desktop on NANO:
+![Kernel 4.x + Lubuntu desktop](https://raw.githubusercontent.com/nightseas/pcduino3_nano_a20/master/doc/nano_linux4_lubuntu.jpg)
