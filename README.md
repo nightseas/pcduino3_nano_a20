@@ -108,7 +108,17 @@ Configure Kernel. The default configuration for Allwinner (sunxi) is a baseline 
 ```sh
 make sunxi_defconfig
 make menuconfig
+
+# Or use xconfig instead of menuconfig
+make xconfig
 ```
+
+Note: For xconfig (Qt-based GUI configuration), Qt packages need to be installed.
+```sh
+sudo apt-get install libqt4-dev pkg-config
+```
+
+
 
 I've prepared a lite version for Nano, download the latest one:
 ```sh
