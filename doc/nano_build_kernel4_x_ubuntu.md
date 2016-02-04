@@ -1,6 +1,6 @@
 # Buildup Linux 4.x & Ubuntu System on pcDuino3 Nano
 
-By Xiaohai Li (haixiaoli@163.com)
+By Xiaohai Li (haixiaolee@gmail.com)
 
 ## How it works
 
