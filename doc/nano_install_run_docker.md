@@ -27,6 +27,78 @@ cd /path-to-kernel
 curl -L https://raw.githubusercontent.com/docker/docker/master/contrib/check-config.sh | /bin/bash /dev/stdin .config
 ```
 
+Features in my config:
+
+```
+Generally Necessary:
+- cgroup hierarchy: properly mounted [/sys/fs/cgroup]
+- apparmor: enabled and tools installed
+- CONFIG_NAMESPACES: enabled
+- CONFIG_NET_NS: enabled
+- CONFIG_PID_NS: enabled
+- CONFIG_IPC_NS: enabled
+- CONFIG_UTS_NS: enabled
+- CONFIG_DEVPTS_MULTIPLE_INSTANCES: enabled
+- CONFIG_CGROUPS: enabled
+- CONFIG_CGROUP_CPUACCT: enabled
+- CONFIG_CGROUP_DEVICE: enabled
+- CONFIG_CGROUP_FREEZER: enabled
+- CONFIG_CGROUP_SCHED: enabled
+- CONFIG_CPUSETS: enabled
+- CONFIG_MEMCG: enabled
+- CONFIG_MACVLAN: enabled
+- CONFIG_VETH: enabled
+- CONFIG_BRIDGE: enabled (as module)
+- CONFIG_BRIDGE_NETFILTER: enabled (as module)
+- CONFIG_NF_NAT_IPV4: enabled
+- CONFIG_IP_NF_FILTER: enabled
+- CONFIG_IP_NF_TARGET_MASQUERADE: enabled
+- CONFIG_NETFILTER_XT_MATCH_ADDRTYPE: enabled
+- CONFIG_NETFILTER_XT_MATCH_CONNTRACK: enabled
+- CONFIG_NF_NAT: enabled
+- CONFIG_NF_NAT_NEEDED: enabled
+- CONFIG_POSIX_MQUEUE: enabled
+
+Optional Features:
+- CONFIG_USER_NS: enabled
+- CONFIG_SECCOMP: enabled
+- CONFIG_MEMCG_KMEM: enabled
+- CONFIG_MEMCG_SWAP: enabled
+- CONFIG_MEMCG_SWAP_ENABLED: enabled
+- CONFIG_BLK_CGROUP: enabled
+- CONFIG_IOSCHED_CFQ: enabled
+- CONFIG_BLK_DEV_THROTTLING: enabled
+- CONFIG_CGROUP_PERF: enabled
+- CONFIG_CGROUP_HUGETLB: missing
+- CONFIG_NET_CLS_CGROUP: enabled (as module)
+- CONFIG_CGROUP_NET_PRIO: enabled
+- CONFIG_CFS_BANDWIDTH: enabled
+- CONFIG_FAIR_GROUP_SCHED: enabled
+- CONFIG_RT_GROUP_SCHED: enabled
+- CONFIG_EXT3_FS: enabled
+- CONFIG_EXT3_FS_XATTR: missing
+- CONFIG_EXT3_FS_POSIX_ACL: enabled
+- CONFIG_EXT3_FS_SECURITY: enabled
+    (enable these ext3 configs if you are using ext3 as backing filesystem)
+- CONFIG_EXT4_FS: enabled
+- CONFIG_EXT4_FS_POSIX_ACL: enabled
+- CONFIG_EXT4_FS_SECURITY: enabled
+- Storage Drivers:
+  - "aufs":
+    - CONFIG_AUFS_FS: missing
+  - "btrfs":
+    - CONFIG_BTRFS_FS: enabled
+  - "devicemapper":
+    - CONFIG_BLK_DEV_DM: enabled
+    - CONFIG_DM_THIN_PROVISIONING: enabled
+  - "overlay":
+    - CONFIG_OVERLAY_FS: enabled
+  - "zfs":
+    - /dev/zfs: present
+    - zfs command: available
+    - zpool command: available
+```
+
 After that re-compile the Kernel & modules and copy them to your SD card. If you have any problem with it, read the system build-up guide.
 
 ## Install and run Docker
