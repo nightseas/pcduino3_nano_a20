@@ -1,4 +1,4 @@
 # Summary
 
-* pcDuino3 Nano
+* [pcDuino3 Nano](pcduino3_nano.md)
 
