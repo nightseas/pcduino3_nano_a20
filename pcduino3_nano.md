@@ -1,2 +1,0 @@
-# pcDuino3 Nano
-
